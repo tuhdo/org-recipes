@@ -69,7 +69,9 @@ Then, running the command `helm-org-snippets` will display it like this:
 Finally, pressing `C-c i` inserts the raw code under a heading:
 
 ```python
-html = urlopen("http://en.wikipedia.org"+articleUrl)
-bsObj = BeautifulSoup(html, "lxml")
-bsObj.find("div", {"id":"bodyContent"}).findAll("a",href=re.compile("^(/wiki/)((?!:).)*$"))
+findAll(tag, attributes, recursive, text, limit, keywords)
+find(tag, attributes, recursive, text, keywords)
+.findAll({"h1","h2","h3","h4","h5","h6"})
+.findAll("span", {"class":"green", "class":"red"})
+.findAll(text="the prince")
 ```
