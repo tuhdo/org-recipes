@@ -43,13 +43,14 @@
 ;;
 ;;; Code:
 
-(defvar hos-cache nil)
+;; (defvar hos-cache nil)
 (defvar hos-org-file-list (when (featurep 'org-wiki)
-                            (org-wiki--page-files)))
+                            (mapcar (lambda (f)
+                                      (concat org-wiki-location "/" f))  (org-wiki--page-files))))
 
-(defun hos-invalidate-cache ()
-  (interactive)
-  (setq hos-cache nil))
+;; (defun hos-invalidate-cache ()
+;;   (interactive)
+;;   (setq hos-cache nil))
 
 (defun helm-org-snippets ()
   "docstring"
@@ -61,14 +62,11 @@
   "docstring"
   (interactive "P")
   (helm-build-sync-source "*hos*"
-    :candidates (if hos-cache
-                    hos-cache
-                  (setq hos-cache
-                        (-flatten-n 1
-                                    (delq nil
-                                          (mapcar (lambda (f)
-                                                    (hos--collect-snippets f))
-                                                  hos-org-file-list)))))
+    :candidates (-flatten-n 1
+                            (delq nil
+                                  (mapcar (lambda (f)
+                                            (hos--collect-snippets f))
+                                          hos-org-file-list)))
     :action '(("Jump to snippet" . hos--persistent-view)
               ("Insert code" . hos--insert))
     :keymap hos-map
@@ -115,7 +113,7 @@
                        (org-element-property :begin headline))))
           (when (and src-blocks
                      (eq (length src-blocks-parent) 1))
-            (cons (concat (propertize (concat f ":") 'face 'dired-directory)
+            (cons (concat (propertize (concat (file-relative-name f org-wiki-location) ":") 'face 'dired-directory)
                           (propertize (concat (number-to-string linum) ":")
                                       'face 'compilation-line-number)
                           "  "
