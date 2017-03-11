@@ -52,7 +52,7 @@
 ;;   (setq hos-cache nil))
 
 (defmacro hos--get-heading-face (headline)
-  `(intern-soft (concat "org-level-" (number-to-string (org-element-property :level ,headline)))))
+  `(make-symbol (concat "org-level-" (number-to-string (org-element-property :level ,headline)))))
 
 (defmacro hos--get-file (c)
   `(nth 0 ,c))
