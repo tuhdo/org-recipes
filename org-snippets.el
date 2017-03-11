@@ -45,7 +45,7 @@
 (require 'subr-x)
 (require 'thingatpt)
 ;; (defvar org-snippets-cache nil)
-(defvar org-snippets-org-file-list nil)
+(defvar org-snippets-file-list nil)
 
 ;; (defun org-snippets-invalidate-cache ()
 ;;   (interactive)
