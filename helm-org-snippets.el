@@ -7,9 +7,9 @@
 ;; Maintainer: Tu, Do Hoang
 ;; Created: March 11, 2017
 ;; Version: 0.1
-;; Package-Requires: ((emacs "24.3") helm org)
+;; Package-Requires: ((emacs "24.4") helm org)
 ;; Keywords: tools
-;; Compatibility: GNU Emacs: 24.3+
+;; Compatibility: GNU Emacs: 24.4+
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -42,7 +42,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Code:
-
+(require 'subr-x)
+(require 'thingatpt)
 ;; (defvar hos-cache nil)
 (defvar hos-org-file-list nil)
 
