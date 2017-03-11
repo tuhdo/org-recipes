@@ -139,7 +139,7 @@
                           (propertize (org-element-property :title headline) 'face (hos--get-heading-face headline)))
                   (list f
                         linum
-                        (make-symbol symbol)
+                        (when symbol (make-symbol symbol))
                         (mapconcat 'identity src-blocks  "")))))))))
 
 (defun hos--get-parent-string (headline)
