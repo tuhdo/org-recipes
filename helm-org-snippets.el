@@ -60,8 +60,11 @@
 (defmacro hos--get-line (c)
   `(nth 1 ,c))
 
-(defmacro hos--get-code (c)
+(defmacro hos--get-symbol (c)
   `(nth 2 ,c))
+
+(defmacro hos--get-code (c)
+  `(nth 3 ,c))
 
 (defun helm-org-snippets ()
   "docstring"
@@ -73,13 +76,7 @@
   "docstring"
   (interactive "P")
   (helm-build-sync-source "Org Snippets"
-    :candidates (-flatten-n 1
-                            (delq nil
-                                  (mapcar (lambda (f)
-                                            (hos--collect-snippets f))
-                                          (when (featurep 'org-wiki)
-                                            (mapcar (lambda (f)
-                                                      (concat org-wiki-location "/" f))  (org-wiki--page-files))))))
+    :candidates (hos--get-candidates)
     :action '(("Jump to snippet" . hos--persistent-view)
               ("Insert code" . hos--insert))
     :keymap hos-map
@@ -106,24 +103,42 @@
 (defun hos--insert (c)
   (insert (hos--get-code c)))
 
-(defun hos--collect-snippets (f)
+(defun hos--get-candidates (&optional recipe)
+  (-flatten-n
+   1
+   (delq
+    nil
+    (mapcar (lambda (f)
+              (hos--collect-snippets f recipe))
+            (when (featurep 'org-wiki)
+              (mapcar (lambda (f)
+                        (concat org-wiki-location "/" f))  (org-wiki--page-files)))))))
+
+(defun hos--collect-snippets (f &optional recipe)
   (with-current-buffer (find-file-noselect f)
     (org-element-map (org-element-parse-buffer 'element) 'headline
       (lambda (headline)
         (let* ((src-blocks (org-element-map headline 'src-block
                              (lambda (s)
                                (org-element-property :value s))))
+               (symbol (org-element-property :SYMBOL headline))
                (src-blocks-parent (org-element-map headline 'headline 'identity))
                (linum (line-number-at-pos
                        (org-element-property :begin headline))))
           (when (and src-blocks
-                     (eq (length src-blocks-parent) 1))
+                     (eq (length src-blocks-parent) 1)
+                     (or (null recipe)
+                         (equal symbol (symbol-name recipe))))
             (cons (concat (concat (file-relative-name f org-wiki-location) ":")
                           (concat (number-to-string linum) ":")
                           " "
+                          (when symbol (propertize (concat  "[" symbol "]  ") 'face 'font-lock-type-face))
                           (hos--get-parent-string headline)
                           (propertize (org-element-property :title headline) 'face (hos--get-heading-face headline)))
-                  (list f linum (mapconcat 'identity src-blocks  "")))))))))
+                  (list f
+                        linum
+                        (make-symbol symbol)
+                        (mapconcat 'identity src-blocks  "")))))))))
 
 (defun hos--get-parent-string (headline)
   (when-let ((parent (org-element-property :parent headline))
@@ -131,6 +146,34 @@
     (concat (hos--get-parent-string parent)
             (propertize parent-str 'face (hos--get-heading-face parent))
             " / ")))
+
+(defun helm-org-snippets-dwim ()
+  (interactive)
+  (if-let ((recipe-list (list-at-point)))
+      (progn
+        (hos--delete-thing-at-point recipe-list)
+        (mapcar (lambda (r)
+                  (insert (hos--symbol-to-snippet r)))
+                recipe-list))
+    (when-let ((symbol (symbol-at-point)))
+      (hos--delete-thing-at-point symbol)
+      (insert (hos--symbol-to-snippet symbol)))))
+
+(defun hos--symbol-to-snippet (symbol)
+  (mapconcat (lambda (c)
+               (hos--get-code (cdr c)))
+             (hos--get-candidates symbol)
+             ""))
+
+(defun hos--delete-thing-at-point (thing)
+  (cond ((listp thing)
+         (if (looking-at "\(")
+             (kill-sexp)
+           (backward-up-list)
+           (kill-sexp)))
+        ((symbolp thing)
+         (mark-sexp)
+         (delete-region (region-beginning) (region-end)))))
 
 (provide 'helm-org-snippets)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
