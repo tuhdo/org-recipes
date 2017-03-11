@@ -142,10 +142,11 @@
     nil
     (mapcar (lambda (f)
               (org-recipes--collect-snippets f recipe))
-            (when (featurep 'org-wiki)
-              (mapcar (lambda (f)
-                        (concat org-wiki-location "/" f))
-                      (org-wiki--page-files)))))))
+            (append org-recipes-file-list
+                    (when (featurep 'org-wiki)
+                      (mapcar (lambda (f)
+                                (concat org-wiki-location "/" f))
+                              (org-wiki--page-files))))))))
 
 (defun org-recipes--collect-snippets (f &optional recipe)
   (with-current-buffer (find-file-noselect f)
