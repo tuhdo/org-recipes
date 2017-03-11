@@ -1,4 +1,4 @@
-# org-snippets - A code snippet manager with Org and Helm #
+# org-recipes - A code snippet manager with Org and Helm #
 
 This package collects code snippets under the inner-most Org heading. It
 provides the following features:
@@ -15,7 +15,7 @@ The snippets are retrieved by scanning the file list in `hos-org-file-list`. If
 
 ## Usage ##
 
-Run the command `org-snippets` to get all Org headings with snippets. Then, you can either:
+Run the command `org-recipes` to get all Org headings with snippets. Then, you can either:
 
 - Run persistent action to view the snippet.
 - Press `C-c i` to insert the tangled source code in a heading.
@@ -62,7 +62,7 @@ Example:
 
 ```
 
-Then, running the command `org-snippets` will display it like this:
+Then, running the command `org-recipes` will display it like this:
 
 ![helm-org-snippets](helm-org-snippets.png)
 
