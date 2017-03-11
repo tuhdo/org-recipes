@@ -153,11 +153,13 @@
       (progn
         (hos--delete-thing-at-point recipe-list)
         (mapcar (lambda (r)
-                  (insert (hos--symbol-to-snippet r)))
+                  (insert (hos--symbol-to-snippet r))
+                  (newline))
                 recipe-list))
     (when-let ((symbol (symbol-at-point)))
       (hos--delete-thing-at-point symbol)
-      (insert (hos--symbol-to-snippet symbol)))))
+      (insert (hos--symbol-to-snippet symbol))
+      (newline))))
 
 (defun hos--symbol-to-snippet (symbol)
   (mapconcat (lambda (c)
