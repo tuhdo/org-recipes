@@ -1,4 +1,4 @@
-;;; helm-org-snippets.el --- A code snippet manager with Org and Helm 
+;;; helm-org-snippets.el --- A code snippet manager with Org and Helm
 ;;
 ;; Filename: helm-org-snippets.el
 ;; Description: A code snippet manager with Org and Helm
@@ -52,6 +52,18 @@
 ;;   (interactive)
 ;;   (setq hos-cache nil))
 
+(defmacro hos--get-heading-face (headline)
+  `(intern-soft (concat "org-level-" (number-to-string (org-element-property :level ,headline)))))
+
+(defmacro hos--get-file (c)
+  `(nth 0 ,c))
+
+(defmacro hos--get-line (c)
+  `(nth 1 ,c))
+
+(defmacro hos--get-code (c)
+  `(nth 2 ,c))
+
 (defun helm-org-snippets ()
   "docstring"
   (interactive)
@@ -79,14 +91,6 @@
         (define-key map (kbd "C-c i") 'hos-insert)
         (delq nil map)
         map))
-(defmacro hos--get-file (c)
-  `(nth 0 ,c))
-
-(defmacro hos--get-line (c)
-  `(nth 1 ,c))
-
-(defmacro hos--get-code (c)
-  `(nth 2 ,c))
 
 (defun hos--persistent-view (c)
   (find-file (hos--get-file c))
@@ -116,9 +120,18 @@
             (cons (concat (propertize (concat (file-relative-name f org-wiki-location) ":") 'face 'dired-directory)
                           (propertize (concat (number-to-string linum) ":")
                                       'face 'compilation-line-number)
-                          "  "
-                          (org-element-property :title headline))
+                          " "
+                          (hos--get-parent-string headline)
+                          (propertize (org-element-property :title headline) 'face (hos--get-heading-face headline)))
                   (list f linum (mapconcat 'identity src-blocks  "")))))))))
+
+(defun hos--get-parent-string (headline)
+  (when-let ((parent (org-element-property :parent headline))
+             (parent-str (org-element-property :raw-value parent)))
+    (concat (hos--get-parent-string parent)
+            (propertize parent-str 'face (hos--get-heading-face parent))
+            " / ")))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; helm-org-snippets.el ends here
 ;; End:
