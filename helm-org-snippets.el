@@ -44,9 +44,7 @@
 ;;; Code:
 
 ;; (defvar hos-cache nil)
-(defvar hos-org-file-list (when (featurep 'org-wiki)
-                            (mapcar (lambda (f)
-                                      (concat org-wiki-location "/" f))  (org-wiki--page-files))))
+(defvar hos-org-file-list nil)
 
 ;; (defun hos-invalidate-cache ()
 ;;   (interactive)
@@ -78,7 +76,9 @@
                             (delq nil
                                   (mapcar (lambda (f)
                                             (hos--collect-snippets f))
-                                          hos-org-file-list)))
+                                          (when (featurep 'org-wiki)
+                                            (mapcar (lambda (f)
+                                                      (concat org-wiki-location "/" f))  (org-wiki--page-files))))))
     :action '(("Jump to snippet" . hos--persistent-view)
               ("Insert code" . hos--insert))
     :keymap hos-map
@@ -132,6 +132,7 @@
             (propertize parent-str 'face (hos--get-heading-face parent))
             " / ")))
 
+(provide 'helm-org-snippets)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; helm-org-snippets.el ends here
 ;; End:
