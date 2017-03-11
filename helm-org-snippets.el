@@ -60,11 +60,11 @@
 (defmacro hos--get-line (c)
   `(nth 1 ,c))
 
-(defmacro hos--get-symbol (c)
+(defmacro hos--get-src-blocks (c)
   `(nth 2 ,c))
 
-(defmacro hos--get-code (c)
-  `(nth 3 ,c))
+(defmacro hos--get-real (candidate)
+  `(cdr ,candidate))
 
 (defun helm-org-snippets ()
   "docstring"
@@ -101,9 +101,39 @@
     (helm-exit-and-execute-action 'hos--insert)))
 
 (defun hos--insert (c)
-  (let ((start (point)))
-    (insert (hos--get-code c))
-    (indent-region start (point))))
+  (maphash (lambda (file src-str)
+             (let ((file-empty (string-equal file "empty")))
+               (with-current-buffer (if file-empty
+                                        (current-buffer)
+                                      (find-file-noselect file))
+                 (let ((start (point)))
+                   (insert src-str)
+                   (indent-region start (point))
+                   (unless file-empty (save-buffer))))))
+           (hos--distribute-src-blocks-strings (hos--get-src-blocks c))))
+
+(defun hos--distribute-src-blocks-strings (src-blocks)
+  (let* ((dist-table (make-hash-table :test #'equal)))
+    (mapcar (lambda (s)
+              (let* ((src-data (hos--process-src-block s))
+                     (file (car src-data))
+                     (new-str (cadr src-data))
+                     (old-str (gethash file dist-table)))
+                (puthash file (if old-str
+                                  (concat old-str new-str)
+                                new-str)  dist-table)))
+            src-blocks)
+    dist-table))
+
+(defun hos--src-string (src-block)
+  (org-element-property :value src-block))
+
+(defun hos--process-src-block (s)
+  "docstring"
+  (let* ((src-parameters (org-babel-parse-header-arguments (org-element-property :parameters s)))
+         (file (cdr (assoc :file src-parameters)))
+         (src-string (hos--src-string s)))
+    (list (or file "empty") src-string)))
 
 (defun hos--get-candidates (&optional recipe)
   (-flatten-n
@@ -114,15 +144,14 @@
               (hos--collect-snippets f recipe))
             (when (featurep 'org-wiki)
               (mapcar (lambda (f)
-                        (concat org-wiki-location "/" f))  (org-wiki--page-files)))))))
+                        (concat org-wiki-location "/" f))
+                      (org-wiki--page-files)))))))
 
 (defun hos--collect-snippets (f &optional recipe)
   (with-current-buffer (find-file-noselect f)
     (org-element-map (org-element-parse-buffer 'element) 'headline
       (lambda (headline)
-        (let* ((src-blocks (org-element-map headline 'src-block
-                             (lambda (s)
-                               (org-element-property :value s))))
+        (let* ((src-blocks (org-element-map headline 'src-block 'identity))
                (symbol (org-element-property :SYMBOL headline))
                (src-blocks-parent (org-element-map headline 'headline 'identity))
                (linum (line-number-at-pos
@@ -139,8 +168,7 @@
                           (propertize (org-element-property :title headline) 'face (hos--get-heading-face headline)))
                   (list f
                         linum
-                        (when symbol (make-symbol symbol))
-                        (mapconcat 'identity src-blocks  "")))))))))
+                        src-blocks))))))))
 
 (defun hos--get-parent-string (headline)
   (when-let ((parent (org-element-property :parent headline))
@@ -156,22 +184,21 @@
         (hos--delete-thing-at-point recipe-list)
         (let ((start (point)))
           (mapcar (lambda (r)
-                    (insert (hos--symbol-to-snippet r))
+                    (hos--insert-recipe r)
                     (newline))
                   recipe-list)
           (indent-region start (point))))
     (when-let ((symbol (symbol-at-point)))
       (hos--delete-thing-at-point symbol)
       (let ((start (point)))
-        (insert (hos--symbol-to-snippet symbol))
-        (indent-region start (point)))
-      (newline))))
+        (hos--insert-recipe symbol)
+        (indent-region start (point))
+        (newline)))))
 
-(defun hos--symbol-to-snippet (symbol)
-  (mapconcat (lambda (c)
-               (hos--get-code (cdr c)))
-             (hos--get-candidates symbol)
-             ""))
+(defun hos--insert-recipe (recipe)
+  (mapcar (lambda (c)
+            (hos--insert (hos--get-real c)))
+          (hos--get-candidates recipe)))
 
 (defun hos--delete-thing-at-point (thing)
   (cond ((listp thing)
