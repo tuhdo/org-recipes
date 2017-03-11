@@ -101,7 +101,9 @@
     (helm-exit-and-execute-action 'hos--insert)))
 
 (defun hos--insert (c)
-  (insert (hos--get-code c)))
+  (let ((start (point)))
+    (insert (hos--get-code c))
+    (indent-region start (point))))
 
 (defun hos--get-candidates (&optional recipe)
   (-flatten-n
@@ -152,13 +154,17 @@
   (if-let ((recipe-list (list-at-point)))
       (progn
         (hos--delete-thing-at-point recipe-list)
-        (mapcar (lambda (r)
-                  (insert (hos--symbol-to-snippet r))
-                  (newline))
-                recipe-list))
+        (let ((start (point)))
+          (mapcar (lambda (r)
+                    (insert (hos--symbol-to-snippet r))
+                    (newline))
+                  recipe-list)
+          (indent-region start (point))))
     (when-let ((symbol (symbol-at-point)))
       (hos--delete-thing-at-point symbol)
-      (insert (hos--symbol-to-snippet symbol))
+      (let ((start (point)))
+        (insert (hos--symbol-to-snippet symbol))
+        (indent-region start (point)))
       (newline))))
 
 (defun hos--symbol-to-snippet (symbol)
