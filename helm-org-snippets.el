@@ -117,9 +117,8 @@
                        (org-element-property :begin headline))))
           (when (and src-blocks
                      (eq (length src-blocks-parent) 1))
-            (cons (concat (propertize (concat (file-relative-name f org-wiki-location) ":") 'face 'dired-directory)
-                          (propertize (concat (number-to-string linum) ":")
-                                      'face 'compilation-line-number)
+            (cons (concat (concat (file-relative-name f org-wiki-location) ":")
+                          (concat (number-to-string linum) ":")
                           " "
                           (hos--get-parent-string headline)
                           (propertize (org-element-property :title headline) 'face (hos--get-heading-face headline)))
