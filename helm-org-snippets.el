@@ -71,7 +71,7 @@
 (defun hos--build-source ()
   "docstring"
   (interactive "P")
-  (helm-build-sync-source "*hos*"
+  (helm-build-sync-source "Org Snippets"
     :candidates (-flatten-n 1
                             (delq nil
                                   (mapcar (lambda (f)
