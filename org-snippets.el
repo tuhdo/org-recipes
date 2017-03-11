@@ -1,6 +1,6 @@
-;;; helm-org-snippets.el --- A code snippet manager with Org and Helm
+;;; org-snippets.el --- A code snippet manager with Org and Helm
 ;;
-;; Filename: helm-org-snippets.el
+;; Filename: org-snippets.el
 ;; Description: A code snippet manager with Org and Helm
 ;; Author: Tu, Do Hoang <tuhdo1710@gmail.com>
 ;; URL      : https://github.com/tuhdo/semantic-refactor
@@ -44,63 +44,63 @@
 ;;; Code:
 (require 'subr-x)
 (require 'thingatpt)
-;; (defvar hos-cache nil)
-(defvar hos-org-file-list nil)
+;; (defvar org-snippets-cache nil)
+(defvar org-snippets-org-file-list nil)
 
-;; (defun hos-invalidate-cache ()
+;; (defun org-snippets-invalidate-cache ()
 ;;   (interactive)
-;;   (setq hos-cache nil))
+;;   (setq org-snippets-cache nil))
 
-(defmacro hos--get-heading-face (headline)
+(defmacro org-snippets--get-heading-face (headline)
   `(intern-soft (concat "org-level-" (number-to-string (org-element-property :level ,headline)))))
 
-(defmacro hos--get-file (c)
+(defmacro org-snippets--get-file (c)
   `(nth 0 ,c))
 
-(defmacro hos--get-line (c)
+(defmacro org-snippets--get-line (c)
   `(nth 1 ,c))
 
-(defmacro hos--get-src-blocks (c)
+(defmacro org-snippets--get-src-blocks (c)
   `(nth 2 ,c))
 
-(defmacro hos--get-real (candidate)
+(defmacro org-snippets--get-real (candidate)
   `(cdr ,candidate))
 
-(defun helm-org-snippets ()
+(defun org-snippets ()
   "docstring"
   (interactive)
-  (helm :sources (hos--build-source)
+  (helm :sources (org-snippets--build-source)
         :buffer "*helm sync source*"))
 
-(defun hos--build-source ()
+(defun org-snippets--build-source ()
   "docstring"
   (interactive "P")
   (helm-build-sync-source "Org Snippets"
-    :candidates (hos--get-candidates)
-    :action '(("Jump to snippet" . hos--persistent-view)
-              ("Insert code" . hos--insert))
-    :keymap hos-map
-    :persistent-action 'hos--persistent-view))
+    :candidates (org-snippets--get-candidates)
+    :action '(("Jump to snippet" . org-snippets--persistent-view)
+              ("Insert code" . org-snippets--insert))
+    :keymap org-snippets-map
+    :persistent-action 'org-snippets--persistent-view))
 
-(setq hos-map
+(setq org-snippets-map
       (let ((map (make-sparse-keymap)))
         (set-keymap-parent map helm-map)
-        (define-key map (kbd "C-c C-i") 'hos-insert)
-        (define-key map (kbd "C-c i") 'hos-insert)
+        (define-key map (kbd "C-c C-i") 'org-snippets-insert)
+        (define-key map (kbd "C-c i") 'org-snippets-insert)
         (delq nil map)
         map))
 
-(defun hos--persistent-view (c)
-  (find-file (hos--get-file c))
-  (goto-line (hos--get-line c))
+(defun org-snippets--persistent-view (c)
+  (find-file (org-snippets--get-file c))
+  (goto-line (org-snippets--get-line c))
   (org-show-subtree))
 
-(defun hos-insert ()
+(defun org-snippets-insert ()
   (interactive)
   (with-helm-alive-p
-    (helm-exit-and-execute-action 'hos--insert)))
+    (helm-exit-and-execute-action 'org-snippets--insert)))
 
-(defun hos--insert (c)
+(defun org-snippets--insert (c)
   (maphash (lambda (file src-str)
              (let ((file-empty (string-equal file "empty")))
                (with-current-buffer (if file-empty
@@ -110,12 +110,12 @@
                    (insert src-str)
                    (indent-region start (point))
                    (unless file-empty (save-buffer))))))
-           (hos--distribute-src-blocks-strings (hos--get-src-blocks c))))
+           (org-snippets--distribute-src-blocks-strings (org-snippets--get-src-blocks c))))
 
-(defun hos--distribute-src-blocks-strings (src-blocks)
+(defun org-snippets--distribute-src-blocks-strings (src-blocks)
   (let* ((dist-table (make-hash-table :test #'equal)))
     (mapcar (lambda (s)
-              (let* ((src-data (hos--process-src-block s))
+              (let* ((src-data (org-snippets--process-src-block s))
                      (file (car src-data))
                      (new-str (cadr src-data))
                      (old-str (gethash file dist-table)))
@@ -125,29 +125,29 @@
             src-blocks)
     dist-table))
 
-(defun hos--src-string (src-block)
+(defun org-snippets--src-string (src-block)
   (org-element-property :value src-block))
 
-(defun hos--process-src-block (s)
+(defun org-snippets--process-src-block (s)
   "docstring"
   (let* ((src-parameters (org-babel-parse-header-arguments (org-element-property :parameters s)))
          (file (cdr (assoc :file src-parameters)))
-         (src-string (hos--src-string s)))
+         (src-string (org-snippets--src-string s)))
     (list (or file "empty") src-string)))
 
-(defun hos--get-candidates (&optional recipe)
+(defun org-snippets--get-candidates (&optional recipe)
   (-flatten-n
    1
    (delq
     nil
     (mapcar (lambda (f)
-              (hos--collect-snippets f recipe))
+              (org-snippets--collect-snippets f recipe))
             (when (featurep 'org-wiki)
               (mapcar (lambda (f)
                         (concat org-wiki-location "/" f))
                       (org-wiki--page-files)))))))
 
-(defun hos--collect-snippets (f &optional recipe)
+(defun org-snippets--collect-snippets (f &optional recipe)
   (with-current-buffer (find-file-noselect f)
     (org-element-map (org-element-parse-buffer 'element) 'headline
       (lambda (headline)
@@ -164,43 +164,43 @@
                           (concat (number-to-string linum) ":")
                           " "
                           (when symbol (propertize (concat  "[" symbol "]  ") 'face 'font-lock-type-face))
-                          (hos--get-parent-string headline)
-                          (propertize (org-element-property :title headline) 'face (hos--get-heading-face headline)))
+                          (org-snippets--get-parent-string headline)
+                          (propertize (org-element-property :title headline) 'face (org-snippets--get-heading-face headline)))
                   (list f
                         linum
                         src-blocks))))))))
 
-(defun hos--get-parent-string (headline)
+(defun org-snippets--get-parent-string (headline)
   (when-let ((parent (org-element-property :parent headline))
              (parent-str (org-element-property :raw-value parent)))
-    (concat (hos--get-parent-string parent)
-            (propertize parent-str 'face (hos--get-heading-face parent))
+    (concat (org-snippets--get-parent-string parent)
+            (propertize parent-str 'face (org-snippets--get-heading-face parent))
             " / ")))
 
-(defun helm-org-snippets-dwim ()
+(defun org-snippets-dwim ()
   (interactive)
   (if-let ((recipe-list (list-at-point)))
       (progn
-        (hos--delete-thing-at-point recipe-list)
+        (org-snippets--delete-thing-at-point recipe-list)
         (let ((start (point)))
           (mapcar (lambda (r)
-                    (hos--insert-recipe r)
+                    (org-snippets--insert-recipe r)
                     (newline))
                   recipe-list)
           (indent-region start (point))))
     (when-let ((symbol (symbol-at-point)))
-      (hos--delete-thing-at-point symbol)
+      (org-snippets--delete-thing-at-point symbol)
       (let ((start (point)))
-        (hos--insert-recipe symbol)
+        (org-snippets--insert-recipe symbol)
         (indent-region start (point))
         (newline)))))
 
-(defun hos--insert-recipe (recipe)
+(defun org-snippets--insert-recipe (recipe)
   (mapcar (lambda (c)
-            (hos--insert (hos--get-real c)))
-          (hos--get-candidates recipe)))
+            (org-snippets--insert (org-snippets--get-real c)))
+          (org-snippets--get-candidates recipe)))
 
-(defun hos--delete-thing-at-point (thing)
+(defun org-snippets--delete-thing-at-point (thing)
   (cond ((listp thing)
          (if (looking-at "\(")
              (kill-sexp)
@@ -210,7 +210,7 @@
          (mark-sexp)
          (delete-region (region-beginning) (region-end)))))
 
-(provide 'helm-org-snippets)
+(provide 'org-snippets)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; helm-org-snippets.el ends here
+;;; org-snippets.el ends here
 ;; End:
