@@ -273,6 +273,10 @@ content. For example:
 ```
 
 
+### Integrate with other completion backends ###
+
+For example, Ivy, Ido. Hopefully someone contributes.
+
 ### Integrate with Yasnippet ###
 
 It should be possible to use Snippet block for generating code:
