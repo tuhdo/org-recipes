@@ -1,4 +1,4 @@
-# org-recipes - A code snippet manager with Org and Helm #
+# org-recipes - A code snippet manager with Org #
 
 This package collects code snippets under the inner-most Org heading. In the
 context of this package, such an Org heading is called a `Recipe`. It provides
