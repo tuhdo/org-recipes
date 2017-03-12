@@ -81,7 +81,7 @@ Have you ever encountered this recurring pattern when writing code:
 - You learned about the usage of a particular complex API; or, you happen to
   read an interesting piece of code in an open source project that you believe
   can be reused for the future; or you simply store common code snippets that is
-  used everywher e.g. code related to get command line options, code that
+  used everywhere e.g. code related to get command line options, code that
   open/close threads/processes...
   
 - As time passes, you forgot most of the knowledge what you acquired today. So,
