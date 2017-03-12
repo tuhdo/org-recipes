@@ -1,4 +1,4 @@
-# org-recipes - A code snippet manager with Org #
+# org-recipes - A code snippet navigator and collector with Org #
 
 This package collects code snippets under the inner-most Org heading. In the
 context of this package, such an Org heading is called a `Recipe`. It provides
@@ -102,10 +102,10 @@ Have you ever encountered this recurring pattern when writing code:
 
 This package automates the above process. How
 about [yasnippet](https://github.com/joaotavora/yasnippet)? Despite being
-similar, this package solves a different problem: it is a snippet manager
-leveraged by the powerful `org-mode`, while `yasnippet` is a templating system.
-In my opinion, yasnippet is best for creating snippets of language syntaxes e.g.
-templates for `if`, `while`... syntaxes in C, Java. 
+similar, this package solves a different problem: it is a snippet navigator and
+collector, leveraged by the powerful `org-mode`, while `yasnippet` is a
+templating system. In my opinion, yasnippet is best for creating snippets of
+language syntaxes e.g. templates for `if`, `while`... syntaxes in C, Java.
 
 On the other hand, in `org-recipe`, each recipe can contain a code snippet
 similar to yasnippet and more: the descriptive text that gives the context of
