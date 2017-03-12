@@ -100,19 +100,22 @@ Have you ever encountered this recurring pattern when writing code:
   
 - You tediously copy/paste parts of a code snippet scattered in its file.
 
-This package automates the above process. Isn't there
-exist [yasnippet](https://github.com/joaotavora/yasnippet)? It's true. However,
-despite being similar, this package solves a different problem: it is a snippet
-manager leveraged by the powerful `org-mode`, while `yasnippet` is a templating
-system. Specifically, each recipe can contain a code snippet similar to
-yasnippet and more: the descriptive text that gives the context of the code. By
-managing code snippets in such a way, users can create their personal code wiki,
-but the relevant source code in the wiki can immediately appear in the current
-working buffer, as demonstrated in the `Example` section.
+This package automates the above process. How
+about [yasnippet](https://github.com/joaotavora/yasnippet)? Despite being
+similar, this package solves a different problem: it is a snippet manager
+leveraged by the powerful `org-mode`, while `yasnippet` is a templating system.
+In my opinion, yasnippet is best for creating snippets of language syntaxes e.g.
+templates for `if`, `while`... syntaxes in C, Java. 
+
+On the other hand, in `org-recipe`, each recipe can contain a code snippet
+similar to yasnippet and more: the descriptive text that gives the context of
+the code, which means everything that Org supports! By managing code snippets in
+such a way, users can create their personal code wiki, but the relevant source
+code in the wiki can immediately appear in the current working buffer, as
+demonstrated in the `Example` section.
 
 If you use [org-wiki](https://github.com/caiorss/org-wiki), all the wiki files
 are automatically used.
-
 
 ## Usage ##
 
