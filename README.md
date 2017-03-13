@@ -158,7 +158,7 @@ For example, at the very beginning, right after the title:
 
 ```org
 #+TITLE: C code snippets
-**#+MODE: c, c++**
+#+MODE: c, c++
 ```
 
 Then, the snippets in the file will only appear when the current buffer is in
@@ -226,11 +226,11 @@ filtered according to major mode to only retrieve the relevant ones.
 
 This can be done with two methods:
 
-- [DONE] Each Org file should be able to annotate that it is applicable for a major
+- [X] Each Org file should be able to annotate that it is applicable for a major
 mode, so `org-recipes` can avoid unncessary parsing. If an Org file is not
 assigned to a major mode, then proceed as usual.
 
-- Only source blocks that are relevant to the current major mode are retrieve.
+- [ ] Only source blocks that are relevant to the current major mode are retrieve.
 
 ### View aggregated recipe headlines ###
 
