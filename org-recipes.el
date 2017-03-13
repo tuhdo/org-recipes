@@ -157,9 +157,9 @@
           (lambda (headline)
             (let* ((src-blocks (delq nil (org-element-map headline 'src-block
                                            (lambda (s)
-                                             (when (eq cur-major-mode (org-recipes--string-to-mode (org-element-property :language s)))
-                                               s)
-                                             ))))
+                                             (when (eq cur-major-mode
+                                                       (org-recipes--string-to-mode (org-element-property :language s)))
+                                               s)))))
                    (symbol (org-element-property :SYMBOL headline))
                    (src-blocks-parent (org-element-map headline 'headline 'identity))
                    (linum (line-number-at-pos
