@@ -237,12 +237,11 @@
   (with-current-buffer buffer
     (save-excursion
       (beginning-of-buffer)
-      (if (search-forward "#+MODE:" nil t)
-          (when-let ((mode-keyword (org-element-property :value (org-element-at-point))))
-            (beginning-of-line)
-            (mapcar #'org-recipes--string-to-mode
-                    (org-recipes--split-mode-list (org-element-property :value (org-element-at-point)))))
-        (list major-mode)))))
+      (when (search-forward "#+MODE:" nil t)
+        (when-let ((mode-keyword (org-element-property :value (org-element-at-point))))
+          (beginning-of-line)
+          (mapcar #'org-recipes--string-to-mode
+                  (org-recipes--split-mode-list (org-element-property :value (org-element-at-point)))))))))
 
 (defun org-recipes--split-mode-list (mode-list)
   (when mode-list
