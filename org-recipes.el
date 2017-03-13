@@ -66,6 +66,9 @@
 (defmacro org-recipes--get-real (candidate)
   `(cdr ,candidate))
 
+(defmacro org-recipes--src-string (src-block)
+  `(org-element-property :value ,src-block))
+
 (defun org-recipes ()
   "docstring"
   (interactive)
@@ -124,9 +127,6 @@
                                 new-str)  dist-table)))
             src-blocks)
     dist-table))
-
-(defun org-recipes--src-string (src-block)
-  (org-element-property :value src-block))
 
 (defun org-recipes--process-src-block (s)
   "docstring"
