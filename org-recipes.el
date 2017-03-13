@@ -149,12 +149,17 @@
                               (org-wiki--page-files))))))))
 
 (defun org-recipes--collect-snippets (f &optional recipe)
-  (let ((org-buf  (find-file-noselect f)))
-    (when (member major-mode (org-recipes--get-target-major-modes org-buf))
+  (let ((org-buf (find-file-noselect f))
+        (cur-major-mode major-mode))
+    (when (member cur-major-mode (org-recipes--get-target-major-modes org-buf))
       (with-current-buffer org-buf
         (org-element-map (org-element-parse-buffer 'element) 'headline
           (lambda (headline)
-            (let* ((src-blocks (org-element-map headline 'src-block 'identity))
+            (let* ((src-blocks (delq nil (org-element-map headline 'src-block
+                                           (lambda (s)
+                                             (when (eq cur-major-mode (org-recipes--string-to-mode (org-element-property :language s)))
+                                               s)
+                                             ))))
                    (symbol (org-element-property :SYMBOL headline))
                    (src-blocks-parent (org-element-map headline 'headline 'identity))
                    (linum (line-number-at-pos
