@@ -149,10 +149,12 @@
                               (org-wiki--page-files))))))))
 
 (defun org-recipes--collect-snippets (f &optional recipe)
-  (let ((org-buf (find-file-noselect f))
-        (cur-major-mode major-mode)
-        (headline-major-modes))
-    (when (member cur-major-mode (org-recipes--get-target-major-modes org-buf))
+  (let* ((org-buf (find-file-noselect f))
+         (target-major-modes (org-recipes--get-target-major-modes org-buf))
+         (cur-major-mode major-mode)
+         (headline-major-modes))
+    (when (or (null target-major-modes)
+              (member cur-major-mode target-major-modes))
       (with-current-buffer org-buf
         (org-element-map (org-element-parse-buffer 'element) 'headline
           (lambda (headline)
