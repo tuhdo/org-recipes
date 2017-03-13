@@ -150,33 +150,39 @@
 
 (defun org-recipes--collect-snippets (f &optional recipe)
   (let ((org-buf (find-file-noselect f))
-        (cur-major-mode major-mode))
+        (cur-major-mode major-mode)
+        (headline-major-modes))
     (when (member cur-major-mode (org-recipes--get-target-major-modes org-buf))
       (with-current-buffer org-buf
         (org-element-map (org-element-parse-buffer 'element) 'headline
           (lambda (headline)
-            (let* ((src-blocks (delq nil (org-element-map headline 'src-block
-                                           (lambda (s)
-                                             (when (eq cur-major-mode
-                                                       (org-recipes--string-to-mode (org-element-property :language s)))
-                                               s)))))
-                   (symbol (org-element-property :SYMBOL headline))
-                   (src-blocks-parent (org-element-map headline 'headline 'identity))
-                   (linum (line-number-at-pos
-                           (org-element-property :begin headline))))
-              (when (and src-blocks
-                         (eq (length src-blocks-parent) 1)
-                         (or (null recipe)
-                             (equal symbol (symbol-name recipe))))
-                (cons (concat (concat (file-relative-name f org-wiki-location) ":")
-                              (concat (number-to-string linum) ":")
-                              " "
-                              (when symbol (propertize (concat  "[" symbol "]  ") 'face 'font-lock-type-face))
-                              (org-recipes--get-parent-string headline)
-                              (propertize (org-element-property :title headline) 'face (org-recipes--get-heading-face headline)))
-                      (list f
-                            linum
-                            src-blocks))))))
+            (setq headline-major-modes (mapcar #'org-recipes--string-to-mode
+                                               (org-recipes--split-mode-list (org-element-property :LANG headline))))
+            (unless headline-major-modes (setq headline-major-modes (list cur-major-mode)))
+            (when (member cur-major-mode headline-major-modes)
+              (let* ((src-blocks (delq nil (org-element-map headline 'src-block
+                                             (lambda (s)
+                                               (when (eq cur-major-mode
+                                                         (org-recipes--string-to-mode (org-element-property :language s)))
+                                                 s)))))
+                     (symbol (org-element-property :SYMBOL headline))
+                     (src-blocks-parent (org-element-map headline 'headline 'identity))
+                     (linum (line-number-at-pos
+                             (org-element-property :begin headline))))
+                (when (and src-blocks
+                           (eq (length src-blocks-parent) 1)
+                           (or (null recipe)
+                               (equal symbol (symbol-name recipe))))
+                  (cons (concat (concat (file-relative-name f org-wiki-location) ":")
+                                (concat (number-to-string linum) ":")
+                                " "
+                                (when symbol (propertize (concat  "[" symbol "]  ") 'face 'font-lock-type-face))
+                                (org-recipes--get-parent-string headline)
+                                (propertize (org-element-property :title headline) 'face (org-recipes--get-heading-face headline)))
+                        (list f
+                              linum
+                              src-blocks)))))
+            ))
         ))))
 
 (defun org-recipes--get-parent-string (headline)
@@ -235,12 +241,12 @@
           (when-let ((mode-keyword (org-element-property :value (org-element-at-point))))
             (beginning-of-line)
             (mapcar #'org-recipes--string-to-mode
-                    (split-string
-                     (replace-regexp-in-string "[ ]*"
-                                               ""
-                                               (org-element-property :value (org-element-at-point)))
-                     ",")))
+                    (org-recipes--split-mode-list (org-element-property :value (org-element-at-point)))))
         (list major-mode)))))
+
+(defun org-recipes--split-mode-list (mode-list)
+  (when mode-list
+    (split-string (replace-regexp-in-string "[ ]*" "" mode-list) ",")))
 
 (defun org-recipes--string-to-mode (m)
   (intern-soft (concat m "-mode")))

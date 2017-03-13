@@ -230,7 +230,7 @@ This can be done with two methods:
 mode, so `org-recipes` can avoid unncessary parsing. If an Org file is not
 assigned to a major mode, then proceed as usual.
 
-- [ ] Only source blocks that are relevant to the current major mode are retrieve.
+- [X] Only source blocks that are relevant to the current major mode are retrieve.
 
 ### View aggregated recipe headlines ###
 
