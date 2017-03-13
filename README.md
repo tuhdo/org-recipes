@@ -148,6 +148,23 @@ print("File hello world")
 #+end_src
 ````
 
+#### Major mode filtering ####
+
+To prevent unncessary snippets to appear in the list, you can put a keyword in
+an Org file that explicitly specify which major modes the file is applicable,
+then only buffer with such major modes will get the snippets from the Org file.
+
+For example, at the very beginning, right after the title:
+
+```org
+#+TITLE: C code snippets
+**#+MODE: c, c++**
+```
+
+Then, the snippets in the file will only appear when the current buffer is in
+`c-mode` or `c++-mode`.
+
+
 ### Option: `org-recipes-file-list` ###
 
 This option is a list of files that `org-recipes` processes to retrieve the list of code snippets.
@@ -209,7 +226,7 @@ filtered according to major mode to only retrieve the relevant ones.
 
 This can be done with two methods:
 
-- Each Org file should be able to annotate that it is applicable for a major
+- [DONE] Each Org file should be able to annotate that it is applicable for a major
 mode, so `org-recipes` can avoid unncessary parsing. If an Org file is not
 assigned to a major mode, then proceed as usual.
 
