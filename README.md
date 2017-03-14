@@ -227,6 +227,10 @@ assigned to a major mode, then proceed as usual.
 
 Certain source blocks under a heading should be possible to ignore. Such blocks should be marked with `:ignore` parameter.
 
+### [ ] Add global block ###
+
+Add a parameter that specifies a source block can appear in any major mode.
+
 ### [ ] View aggregated recipe headlines ###
 
 A recipe can be as simple as a symbol. In this case, viewing it from the Helm
