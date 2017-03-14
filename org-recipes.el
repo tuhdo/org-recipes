@@ -115,25 +115,45 @@
                    (unless file-empty (save-buffer))))))
            (org-recipes--distribute-src-blocks-strings (org-recipes--get-src-blocks c))))
 
+(defmacro org-recipes--src-data-get-file (s)
+  `(car ,s))
+
+(defmacro org-recipes--src-data-get-ignore (s)
+  `(cadr ,s))
+
+(defmacro org-recipes--src-data-get-str (s)
+  `(caddr ,s))
+
 (defun org-recipes--distribute-src-blocks-strings (src-blocks)
   (let* ((dist-table (make-hash-table :test #'equal)))
     (mapcar (lambda (s)
               (let* ((src-data (org-recipes--process-src-block s))
-                     (file (car src-data))
-                     (new-str (cadr src-data))
+                     (file (org-recipes--src-data-get-file src-data))
+                     (ignore (org-recipes--src-data-get-ignore src-data))
+                     (new-str (org-recipes--src-data-get-str src-data))
                      (old-str (gethash file dist-table)))
-                (puthash file (if old-str
-                                  (concat old-str new-str)
-                                new-str)  dist-table)))
+                (unless ignore
+                  (puthash file
+                           (if old-str
+                               (concat old-str new-str)
+                             new-str)
+                           dist-table))))
             src-blocks)
     dist-table))
 
 (defun org-recipes--process-src-block (s)
   "docstring"
-  (let* ((src-parameters (org-babel-parse-header-arguments (org-element-property :parameters s)))
+  (let* ((src-parameters (org-recipes--filter-src-parameters
+                          (org-babel-parse-header-arguments (org-element-property :parameters s))
+                          '(:file :ignore)))
          (file (cdr (assoc :file src-parameters)))
+         (ignore (cdr (assoc :ignore src-parameters)))
          (src-string (org-recipes--src-string s)))
-    (list (or file "empty") src-string)))
+    (list (or file "empty") ignore src-string)))
+
+(defun org-recipes--filter-src-parameters (src-params key-list)
+  (delete-if (lambda (s)
+               (not (member (car s) key-list))) src-params))
 
 (defun org-recipes--get-candidates (&optional recipe)
   (-flatten-n
