@@ -184,8 +184,9 @@
             (when (member cur-major-mode headline-major-modes)
               (let* ((src-blocks (delq nil (org-element-map headline 'src-block
                                              (lambda (s)
-                                               (when (eq cur-major-mode
-                                                         (org-recipes--string-to-mode (org-element-property :language s)))
+                                               (when (or headline-major-modes
+                                                         (eq cur-major-mode
+                                                             (org-recipes--string-to-mode (org-element-property :language s))))
                                                  s)))))
                      (symbol (org-element-property :SYMBOL headline))
                      (src-blocks-parent (org-element-map headline 'headline 'identity))
