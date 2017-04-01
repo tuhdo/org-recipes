@@ -121,23 +121,46 @@
 (defmacro org-recipes--src-data-get-ignore (s)
   `(cadr ,s))
 
-(defmacro org-recipes--src-data-get-str (s)
+(defmacro org-recipes--src-data-pre-recipe-list (s)
   `(caddr ,s))
+
+(defmacro org-recipes--src-data-post-recipe-list (s)
+  `(cadddr ,s))
+
+(defmacro org-recipes--src-data-get-str (s)
+  `(cadddr (cdr ,s)))
 
 (defun org-recipes--distribute-src-blocks-strings (src-blocks)
   (let* ((dist-table (make-hash-table :test #'equal)))
     (mapcar (lambda (s)
               (let* ((src-data (org-recipes--process-src-block s))
+                     (pre-recipe-list (org-recipes--src-data-recipe-list src-data))
+                     (post-recipe-list (org-recipes--src-data-post-recipe-list src-data))
                      (file (org-recipes--src-data-get-file src-data))
                      (ignore (org-recipes--src-data-get-ignore src-data))
                      (new-str (org-recipes--src-data-get-str src-data))
-                     (old-str (gethash file dist-table)))
+                     (old-str (gethash file dist-table))
+                     (pre-str (with-temp-buffer
+                                (mapcar (lambda (r)
+                                          (when-let ((candidates (org-recipes--get-candidates r)))
+                                            (org-recipes--insert-candidates candidates)
+                                            (newline)))
+                                        pre-recipe-list)
+                                (buffer-string)))
+                     (post-str (with-temp-buffer
+                                 (mapcar (lambda (r)
+                                           (when-let ((candidates (org-recipes--get-candidates r)))
+                                             (newline)
+                                             (org-recipes--insert-candidates candidates)))
+                                         post-recipe-list)
+                                 (buffer-string))))
                 (unless ignore
                   (puthash file
                            (if old-str
-                               (concat old-str new-str)
-                             new-str)
-                           dist-table))))
+                               (concat pre-str old-str new-str post-str)
+                             (concat  pre-str new-str post-str))
+                           dist-table)
+                  )))
             src-blocks)
     dist-table))
 
@@ -145,11 +168,13 @@
   "docstring"
   (let* ((src-parameters (org-recipes--filter-src-parameters
                           (org-babel-parse-header-arguments (org-element-property :parameters s))
-                          '(:file :ignore)))
+                          '(:file :pre-recipe :post-recipe :ignore)))
          (file (cdr (assoc :file src-parameters)))
          (ignore (cdr (assoc :ignore src-parameters)))
+         (pre-recipe-list (cdr (assoc :pre-recipe src-parameters)))
+         (post-recipe-list (cdr (assoc :post-recipe src-parameters)))
          (src-string (org-recipes--src-string s)))
-    (list (or file "empty") ignore src-string)))
+    (list (or file "empty") ignore pre-recipe-list post-recipe-list src-string)))
 
 (defun org-recipes--filter-src-parameters (src-params key-list)
   (delete-if (lambda (s)
@@ -217,19 +242,8 @@
 
 (defun org-recipes-dwim ()
   (interactive)
-  (if-let ((recipe-list (list-at-point))           )
-      (progn
-        (let ((start (point))
-              (deleted))
-          (mapcar (lambda (r)
-                    (when-let ((candidates (org-recipes--get-candidates r)))
-                      (unless deleted
-                        (org-recipes--delete-thing-at-point recipe-list)
-                        (setq deleted t))
-                      (org-recipes--insert-candidates candidates)
-                      (newline)))
-                  recipe-list)
-          (indent-region start (point))))
+  (if-let ((recipe-list (list-at-point)))
+      (org-recipes--process-recipes recipe-list)
     (when-let ((symbol (symbol-at-point))
                (candidates (org-recipes--get-candidates symbol)))
       (org-recipes--delete-thing-at-point symbol)
@@ -237,6 +251,19 @@
         (org-recipes--insert-candidates candidates)
         (indent-region start (point))
         (newline)))))
+
+(defun org-recipes--process-recipes (recipe-list &optional deleted)
+  (let ((start (point))
+        (deleted deleted))
+    (mapcar (lambda (r)
+              (when-let ((candidates (org-recipes--get-candidates r)))
+                (unless deleted
+                  (org-recipes--delete-thing-at-point recipe-list)
+                  (setq deleted t))
+                (org-recipes--insert-candidates candidates)
+                (newline)))
+            recipe-list)
+    (indent-region start (point))))
 
 (defun org-recipes--insert-candidates (candidates)
   (mapcar (lambda (c)

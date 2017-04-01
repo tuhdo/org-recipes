@@ -164,6 +164,25 @@ For example, at the very beginning, right after the title:
 Then, the snippets in the file will only appear when the current buffer is in
 `c-mode` or `c++-mode`.
 
+#### Composite Recipe ####
+An Org source block can be composed of various other recipes before or after its main body. For example:
+
+```org
+* Process connection
+
+#+begin_src c++ :pre-recipe '(PrepareSocket Bind Open Listen) :post-recipe '(CloseSocket)
+
+....code for processing connections ...
+
+#+end_src
+```
+
+When added with the parameter `:pre-recipe`, all recipes inside the list is
+inserted before the main code body of the source block. Similarly, recipes in
+`:post-recipe` are inserted after the main code body. 
+
+This feature enables reusability.
+
 
 ### Option: `org-recipes-file-list` ###
 
@@ -227,6 +246,21 @@ assigned to a major mode, then proceed as usual.
 
 Certain source blocks under a heading should be possible to ignore. Such blocks should be marked with `:ignore` parameter.
 
+
+### [X] Composite Recipe ###
+
+An Org source block should be able to specify a list of existing recipes as its
+content. For example:
+
+```org
+* Server program
+
+#+begin_src c++ :recipe '(PrepareSocket Bind Open Listen Process CloseSocket)
+#+end_src
+```
+
+
+
 ### [ ] Add global block ###
 
 Add a parameter that specifies a source block can appear in any major mode.
@@ -282,20 +316,6 @@ should also be able to keep a list of common files.
 Since we can view the summary (by collecting appropriate Org headlines) of a
 list of recipes, it should also be possible to collect an aggregated content of
 each recipe.
-
-### [ ] Composite Recipe ###
-
-An Org headline should be able to specify a list of existing recipes as its
-content. For example:
-
-```org
-* Server program
-
-#+begin_recipe
-(PrepareSocket Bind Open Listen Process CloseSocket)
-#+end_recipe
-```
-
 
 ### [ ] Integrate with other completion backends ###
 
