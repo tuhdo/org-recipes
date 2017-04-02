@@ -134,7 +134,7 @@
   (let* ((dist-table (make-hash-table :test #'equal)))
     (mapcar (lambda (s)
               (let* ((src-data (org-recipes--process-src-block s))
-                     (pre-recipe-list (org-recipes--src-data-recipe-list src-data))
+                     (pre-recipe-list (org-recipes--src-data-pre-recipe-list src-data))
                      (post-recipe-list (org-recipes--src-data-post-recipe-list src-data))
                      (file (org-recipes--src-data-get-file src-data))
                      (ignore (org-recipes--src-data-get-ignore src-data))
