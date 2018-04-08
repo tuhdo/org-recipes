@@ -221,7 +221,7 @@
                            (eq (length src-blocks-parent) 1)
                            (or (null recipe)
                                (equal symbol (symbol-name recipe))))
-                  (cons (concat (concat (file-relative-name f org-wiki-location) ":")
+                  (cons (concat (concat (file-relative-name f (car org-recipes-file-list)) ":")
                                 (concat (number-to-string linum) ":")
                                 " "
                                 (when symbol (propertize (concat  "[" symbol "]  ") 'face 'font-lock-type-face))
