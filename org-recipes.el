@@ -45,7 +45,13 @@
 (require 'subr-x)
 (require 'thingatpt)
 ;; (defvar org-recipes-cache nil)
-(defvar org-recipes-file-list nil)
+
+
+
+(defcustom org-recipes-file-list nil
+  "List of files that org-recipes will search for code snippets."
+  :type 'list
+  :group 'org-recipes)
 
 ;; (defun org-recipes-invalidate-cache ()
 ;;   (interactive)
