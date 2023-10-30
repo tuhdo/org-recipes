@@ -231,7 +231,8 @@
                                 " "
                                 (when symbol (propertize (concat  "[" symbol "]  ") 'face 'font-lock-type-face))
                                 (org-recipes--get-parent-string headline)
-                                (propertize (org-element-property :title headline) 'face (org-recipes--get-heading-face headline)))
+                                ;; (format "%s" (org-element-property :title headline))
+                                (propertize (format "%s" (org-element-property :title headline)) 'face (org-recipes--get-heading-face headline)))
                         (list f
                               linum
                               src-blocks)))))
