@@ -45,8 +45,11 @@
 (require 'subr-x)
 (require 'thingatpt)
 ;; (defvar org-recipes-cache nil)
-(defvar org-recipes-file-list nil)
 
+(defcustom org-recipes-directory "~/org-recipes"
+  "Source directory that org-recipes will search for code snippets in every Org files."
+  :type 'list
+  :group 'org-recipes)
 ;; (defun org-recipes-invalidate-cache ()
 ;;   (interactive)
 ;;   (setq org-recipes-cache nil))
@@ -109,10 +112,12 @@
                (with-current-buffer (if file-empty
                                         (current-buffer)
                                       (find-file-noselect file))
-                 (let ((start (point)))
-                   (insert src-str)
-                   (indent-region start (point))
-                   (unless file-empty (save-buffer))))))
+                 (save-excursion
+                   (beginning-of-line)
+                   (let ((start (point)))
+                     (insert src-str)
+                     (indent-region start (point))
+                     (unless file-empty (save-buffer)))))))
            (org-recipes--distribute-src-blocks-strings (org-recipes--get-src-blocks c))))
 
 (defmacro org-recipes--src-data-get-file (s)
@@ -187,7 +192,7 @@
     nil
     (mapcar (lambda (f)
               (org-recipes--collect-snippets f recipe))
-            (append org-recipes-file-list
+            (append (directory-files-recursively org-recipes-directory "")
                     (when (featurep 'org-wiki)
                       (mapcar (lambda (f)
                                 (concat org-wiki-location "/" f))
@@ -221,7 +226,7 @@
                            (eq (length src-blocks-parent) 1)
                            (or (null recipe)
                                (equal symbol (symbol-name recipe))))
-                  (cons (concat (concat (file-relative-name f org-wiki-location) ":")
+                  (cons (concat (concat (file-relative-name f org-recipes-directory) ":")
                                 (concat (number-to-string linum) ":")
                                 " "
                                 (when symbol (propertize (concat  "[" symbol "]  ") 'face 'font-lock-type-face))
