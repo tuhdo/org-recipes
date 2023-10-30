@@ -20,6 +20,14 @@ The snippets are retrieved by scanning the file list in `org-recipes-file-list`.
 
 ## Example ##
 
+The example is using Python. For Python, please set
+`org-edit-src-content-indentation` to `0`, so that the src block is
+not indent by spaces, which messes with code insertion for Python:
+
+```emacs-lisp
+(setq org-edit-src-content-indentation 0)
+```
+
 Suppose we have an org file with the following snippets:
 
 ```org
